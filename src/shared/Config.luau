@@ -17,9 +17,9 @@ Config.REBIRTH_BASE = 100000      -- Biaya rebirth = REBIRTH_BASE * 2^Rebirths
 Config.REBIRTH_RESET_MONEY = 100  -- Uang setelah rebirth
 Config.LOCK_DURATION = 30         -- Lock base aktif 30 detik per aktivasi
 Config.STEAL_RANGE = 12           -- Jarak maksimum pencuri ke pedestal (stud)
-Config.STEAL_COOLDOWN = 5         -- Cooldown sukses antar pencurian (detik, DESIGN 16.3)
-Config.STEAL_ATTEMPT_COOLDOWN = 1 -- Rate limit percobaan steal (detik, DESIGN 16.3/18.6)
-Config.CLAIM_RANGE = 12           -- Jarak maksimum pemain ke peti saat klaim (stud, DESIGN 16.3)
+Config.CLAIM_RANGE = 12           -- Jarak maksimum klaim peti (stud)
+Config.STEAL_COOLDOWN = 5         -- Cooldown sukses antar pencurian (detik)
+Config.STEAL_ATTEMPT_COOLDOWN = 1 -- Rate limit percobaan steal (detik)
 
 -- ============================================================================
 -- Flood Event (Pasar Tumpah)
@@ -40,14 +40,15 @@ Config.CRATE_UPGRADE = {          -- Peluang peti naik satu tingkat
 
 -- ============================================================================
 -- DataStore
+-- Konstanta revisi ke-3 (DESIGN.md 16.3, 17): versi schema, retry load/save, batas sanity validasi.
 -- ============================================================================
 Config.DATA_VERSION = 1
 Config.DATASTORE_NAME = "PasarNusantara_V5"
-Config.LOAD_MAX_ATTEMPTS = 3      -- Percobaan load ulang maksimal (DESIGN 17.3)
-Config.LOAD_RETRY_DELAY = 2       -- Jeda antar percobaan load/save (detik)
-Config.SAVE_MAX_ATTEMPTS = 2      -- Percobaan save ulang maksimal (DESIGN 17.2)
-Config.MAX_MONEY = 1000000000000  -- Batas sanity validasi load: 1e12 (DESIGN 16.3)
-Config.MAX_REBIRTHS = 100         -- Batas sanity validasi load (DESIGN 16.3)
+Config.LOAD_MAX_ATTEMPTS = 3       -- Retry GetAsync maksimal 3 kali
+Config.LOAD_RETRY_DELAY = 2        -- Jeda antar percobaan load/save (detik)
+Config.SAVE_MAX_ATTEMPTS = 2       -- Retry UpdateAsync maksimal 2 kali
+Config.MAX_MONEY = 1000000000000   -- Batas sanity uang saat validasi load (1e12)
+Config.MAX_REBIRTHS = 100          -- Batas sanity jumlah rebirth saat validasi load
 
 -- ============================================================================
 -- Roster Brainrot (7 tingkat, urut dari termurah)
@@ -137,8 +138,10 @@ Config.TERRAIN_POS = Vector3.new(0, -1, 0)
 
 Config.CONVEYOR_SIZE = Vector3.new(30, 0.5, 320) -- sabuk kayu, atas y = 0.55
 Config.CONVEYOR_POS = Vector3.new(0, 0.3, 0)
-Config.CONVEYOR_END_Z = 160      -- Setengah panjang conveyor 320 (DESIGN 16.3, KOREKSI LANJUT)
 Config.CONVEYOR_LANES = { -7.5, 7.5 }            -- 2 jalur conveyor (sumbu x)
+-- Ujung conveyor (KOREKSI LANJUT): setengah panjang conveyor 320; dipakai
+-- bersama oleh spawn, gerak, pemeriksaan ujung, dan pembersihan.
+Config.CONVEYOR_END_Z = 160
 
 Config.PLAZA_SIZE = Vector3.new(110, 0.6, 55)    -- plaza selatan, sekitar z = 155
 Config.PLAZA_POS = Vector3.new(0, 0.3, 155)
@@ -150,9 +153,6 @@ Config.SPAWN_SIZE = Vector3.new(16, 1, 16)
 -- pemain di luar +-28 x / +-23 z dari pusat base-nya dianggap di luar base.
 Config.BASE_HALF_X = 28
 Config.BASE_HALF_Z = 23
--- Nama resmi batas aman base menurut DESIGN 16.3/19.2 (dipakai Flood.isInsideOwnBase
--- mulai Stage 4). BASE_HALF_* dipertahankan: Flood.luau yang sudah ada masih
--- membaca BASE_HALF_X/Z lewat cfg() + DEFAULT_CONFIG-nya sendiri.
 Config.SAFE_HALF_X = 28
 Config.SAFE_HALF_Z = 23
 
